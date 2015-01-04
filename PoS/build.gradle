@@ -1,0 +1,49 @@
+apply plugin: 'java'
+
+sourceCompatibility = 1.7
+version = '1.0'
+
+repositories {
+    maven { url 'http://repo.spring.io/plugins-release' }
+    maven { url 'http://repo.spring.io/libs-snapshot'}
+    maven { url 'http://repo.spring.io/libs-release'}
+    mavenCentral()
+}
+
+configurations {
+    provided
+    compile.extendsFrom provided
+}
+
+//create a single Jar with all dependencies
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'PoS Example',
+                'Implementation-Version': version
+                // 'Main-Class': ''
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+jar {
+    dependsOn configurations.runtime
+    from {
+        (configurations.runtime - configurations.provided).collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    } {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+    }
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    provided("com.gemstone.gemfire:gemfire:$gemfireVersion")
+    compile("org.apache.httpcomponents:httpasyncclient:$apacheHttpAsyncClient")
+    provided("antlr:antlr:$antlrVersion")
+
+}

@@ -1,0 +1,2 @@
+connect --jmx-manager=localhost[1099]
+execute function --id=RandomTxGenerator --arguments=5

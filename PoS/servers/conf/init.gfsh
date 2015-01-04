@@ -1,0 +1,23 @@
+# connect
+connect --jmx-manager=localhost[1099]
+
+# JAR location
+deploy --jar=/Users/wmarkito/Pivotal/Customers/gire/samples/Kiosk/build/libs/Kiosk-1.0.jar
+
+# Create Async
+create async-event-queue --id="transactionQueue" --listener=io.pivotal.example.listener.TransactionEventListener --persistent --parallel --enable-batch-conflation --batch-size=30 --batch-time-interval=20000 --listener-param=endpoint#http://localhost/gemfire/transaction/
+
+# Create region
+create region --name=transaction --type=PARTITION --async-event-queue-id=transactionQueue --redundant-copies=1 --cache-listener=io.pivotal.example.listener.SimpleCacheListener
+
+## error region
+create region --name=transaction_error --type=PARTITION_PERSISTENT 
+
+create async-event-queue --id="transactionQueue2" --listener=io.pivotal.example.listener.TransactionEventListener --persistent --enable-batch-conflation --batch-size=30 --batch-time-interval=10000
+
+# Server side auto-serializable
+configure pdx --auto-serializable-classes="io.pivotal.example.data.*"
+
+
+# REPLICATE ?
+#create region --name=transaction --type=REPLICATE --async-event-queue-id=transactionQueue

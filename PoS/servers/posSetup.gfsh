@@ -1,0 +1,18 @@
+#### POS GFSH script
+# connect
+connect --jmx-manager=localhost[1098]
+
+# PDX
+#configure pdx --read-serialized=true --disk-store=SerializationDiskStore
+
+# JAR location (change location properly)
+deploy --jar=/Users/wmarkito/Pivotal/Customers/Samples/PoS/build/libs/PoS-1.0.jar
+
+# Create Async
+create async-event-queue --id="transactionQueue" --listener=io.pivotal.example.listener.TransactionEventListener --persistent --parallel --enable-batch-conflation --batch-size=30 --batch-time-interval=20000 --listener-param=ENDPOINT#http://localhost/gemfire/transaction/,ERROR_REGION#transaction_error,ID_FIELD#id
+
+# Create region
+create region --name=transaction --type=PARTITION_PERSISTENT_OVERFLOW --async-event-queue-id=transactionQueue --redundant-copies=1
+
+## error region
+create region --name=transaction_error --type=PARTITION_PERSISTENT_OVERFLOW
