@@ -1,0 +1,9 @@
+## BackOffice gfsh script
+
+connect --locator=localhost[10333]
+
+# set PDX global properties
+configure pdx --read-serialized=true --disk-store
+
+# create backoffice transaction region
+create region --name=transaction --type=PARTITION_PERSISTENT_OVERFLOW --skip-if-exists
